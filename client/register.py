@@ -6,7 +6,7 @@ from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.backends import default_backend
 
-USER_DB_PATH = "../server/user_db.json"
+USER_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "server", "user_db.json")
 
 IPINFO_TOKEN = os.getenv("IPINFO_TOKEN")
 handler = ipinfo.getHandler(IPINFO_TOKEN)

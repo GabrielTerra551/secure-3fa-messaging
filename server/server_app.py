@@ -1,8 +1,9 @@
 from flask import Flask, request, jsonify
 import base64
 
-from verify_auth import verify_all
-from crypto import decrypt_message
+from server.verify_auth import verify_all
+
+from server.crypto import decrypt_message
 
 app = Flask(__name__)
 
