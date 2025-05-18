@@ -1,0 +1,26 @@
+# Bytecode Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyc
+
+# Editor settings
+.vscode/
+.idea/
+
+# Ambientes virtuais
+env/
+venv/
+
+# Arquivos temporários
+*.log
+*.tmp
+*.bak
+
+# Arquivos específicos do projeto
+client/secrets.json
+server/user_db.json
+
+# Arquivos gerados
+*.png
+*.zip
