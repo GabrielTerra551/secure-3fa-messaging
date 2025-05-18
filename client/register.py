@@ -10,8 +10,7 @@ from cryptography.hazmat.backends import default_backend
 
 USER_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "server", "user_db.json")
 
-IPINFO_TOKEN = os.getenv("IPINFO_TOKEN")
-handler = ipinfo.getHandler(IPINFO_TOKEN)
+handler = ipinfo.getHandler()
 
 def get_location(ip: str = None):
     details = handler.getDetails(ip)

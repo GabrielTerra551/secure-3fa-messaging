@@ -1,9 +1,10 @@
 import json
 import base64
-from getpass import getpass
-
-from client import register, auth, crypto
 import requests
+
+from utils.ipinfo_lookup import get_location
+from getpass import getpass
+from client import register, auth, crypto
 
 SERVER_URL = "http://localhost:5000/receive"  # Altere conforme necessário
 
@@ -30,7 +31,7 @@ def autenticar_e_enviar():
         result = crypto.encrypt_message(totp_code, mensagem.decode())
         ciphertext = bytes.fromhex(result["ciphertext"])
         nonce = bytes.fromhex(result["nonce"])
-
+        location = get_location()
 
         # Codificar binários para envio
         data = {
@@ -38,7 +39,8 @@ def autenticar_e_enviar():
             "password": password,
             "totp_code": totp_code,
             "ciphertext": base64.b64encode(ciphertext).decode(),
-            "nonce": base64.b64encode(nonce).decode()
+            "nonce": base64.b64encode(nonce).decode(),
+            "location": location,
         }
 
         response = requests.post(SERVER_URL, json=data)

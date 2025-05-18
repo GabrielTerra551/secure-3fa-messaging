@@ -13,13 +13,14 @@ app = Flask(__name__)
 def receive_message():
     data = request.get_json()
 
-    required_fields = ["username", "password", "totp_code", "ciphertext", "nonce"]
+    required_fields = ["username", "password", "totp_code", "ciphertext", "nonce", "location"]
     if not all(field in data for field in required_fields):
         return jsonify({"error": "Missing fields"}), 400
 
     username = data["username"]
     password = data["password"]
     totp_code = data["totp_code"]
+    location = data["location"]
 
     # Decode base64 inputs
     try:
@@ -30,7 +31,7 @@ def receive_message():
 
     # Autenticação 3FA
     try:
-        secret = verify_all(username, password, totp_code)
+        secret = verify_all(username, password, totp_code, location)
         if not secret[0]:
             return jsonify({"error":"Authentication failed: " + secret[1]}), 403
     except Exception as e:

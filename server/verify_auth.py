@@ -35,10 +35,13 @@ def verify_totp(totp_secret: str, code: str) -> bool:
     print(f"[DEBUG] Código esperado: {expected} — Código recebido: {code}")
     return totp.verify(code, valid_window=1)
 
-def verify_all(username: str, password: str, totp_code: str):
+def verify_all(username: str, password: str, totp_code: str, location: str):
     user = load_user(username)
     if not user:
         return False, "Usuário não encontrado"
+
+    if user["location"] != location:
+        return False, "Localização não corresponde ao registro"
 
     try:
         key = derive_password_key(password, user["salt"])
@@ -54,9 +57,9 @@ def verify_all(username: str, password: str, totp_code: str):
 
     return True, "Autenticação válida"
 
-if __name__ == "__main__":
-    user = input("Usuário: ")
-    pwd = input("Senha: ")
-    code = input("Código TOTP: ")
-    result, msg = verify_all(user, pwd, code)
-    print(msg)
+# if __name__ == "__main__":
+    # user = input("Usuário: ")
+    # pwd = input("Senha: ")
+    # code = input("Código TOTP: ")
+    # result, msg = verify_all(user, pwd, code)
+    # print(msg)
