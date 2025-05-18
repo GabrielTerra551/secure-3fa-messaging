@@ -1,0 +1,34 @@
+import json
+import requests
+from client import auth, crypto
+
+SERVER_URL = "http://localhost:5000/receive"  # Ajuste conforme necessário
+
+def send_encrypted_message():
+    print("=== Autenticação 3FA ===")
+    success = auth.authenticate()
+    if not success:
+        print("Falha na autenticação. Encerrando.")
+        return
+
+    username = input("Confirme o nome do usuário autenticado: ")
+    message = input("Mensagem a ser enviada: ")
+
+    print("Cifrando mensagem...")
+    result = crypto.encrypt_message(username, message)
+
+    payload = {
+        "username": username,
+        "nonce": result["nonce"],
+        "ciphertext": result["ciphertext"]
+    }
+
+    print("Enviando para o servidor...")
+    try:
+        response = requests.post(SERVER_URL, json=payload)
+        print(f"Resposta do servidor: {response.status_code} - {response.text}")
+    except Exception as e:
+        print(f"Erro ao enviar mensagem: {e}")
+
+if __name__ == "__main__":
+    send_encrypted_message()

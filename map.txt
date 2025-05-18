@@ -1,0 +1,69 @@
+secure-3fa-messaging/
+├── client/
+│   ├── register.py
+│   │   └── Realiza o cadastro do usuário:
+│   │       - Gera salt e derivada da senha com SCRYPT
+│   │       - Detecta localização com IPInfo
+│   │       - Gera secret TOTP, cria QR Code
+│   │       - Cifra o secret TOTP com AES-GCM e envia ao servidor
+│   │
+│   ├── auth.py
+│   │   └── Simula autenticação do cliente:
+│   │       - Coleta senha e código TOTP
+│   │       - Opcionalmente valida localmente (caso deseje testar antes do envio)
+│   │
+│   ├── crypto.py
+│   │   └── Criptografia simétrica no cliente:
+│   │       - Deriva chave simétrica via PBKDF2 usando TOTP
+│   │       - Cifra mensagens com AES-GCM
+│   │
+│   ├── send_message.py
+│   │   └── Integra autenticação e criptografia:
+│   │       - Coleta credenciais e TOTP
+│   │       - Cifra a mensagem e envia via HTTP POST para o servidor
+│   │
+│   └── secrets.json
+│       └── Armazena localmente os secrets TOTP gerados (simulando app autenticador)
+│
+├── server/
+│   ├── server_app.py
+│   │   └── Servidor Flask:
+│   │       - Recebe as mensagens cifradas via `/receive`
+│   │       - Realiza autenticação 3FA
+│   │       - Decifra a mensagem e retorna ao cliente
+│   │
+│   ├── verify_auth.py
+│   │   └── Verificação dos 3 fatores:
+│   │       - Verifica senha com SCRYPT
+│   │       - Decifra o secret TOTP com AES-GCM
+│   │       - Valida TOTP com `pyotp`
+│   │
+│   ├── crypto.py
+│   │   └── Criptografia simétrica no servidor:
+│   │       - Deriva chave com PBKDF2 a partir do TOTP
+│   │       - Decifra mensagem AES-GCM
+│   │
+│   └── user_db.json
+│       └── Banco de dados simulado do servidor:
+│           - Armazena nome, telefone, localização, senha derivada, salt e secret TOTP cifrado
+│
+├── utils/
+│   ├── ipinfo_lookup.py
+│   │   └── Consulta IPInfo para obter cidade e país do IP público do usuário
+│   │
+│   └── qr_generator.py
+│       └── Gera QR Code para o secret TOTP, compatível com Google Authenticator
+│
+├── run_client.py
+│   └── Interface terminal para o lado cliente:
+│       - Permite registrar novo usuário
+│       - Autenticar e enviar mensagem
+│
+├── run_server.py
+│   └── Inicia o servidor Flask da aplicação
+│
+├── requirements.txt
+│   └── Lista de dependências do projeto
+│
+└── README.md
+    └── Guia de instalação, execução e arquitetura do projeto
