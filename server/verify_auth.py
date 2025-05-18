@@ -23,13 +23,6 @@ def derive_password_key(password: str, salt_hex: str) -> bytes:
     )
     return kdf.derive(password.encode())
 
-def verify_password(stored_hash_hex, password, salt_hex):
-    try:
-        derived_key = derive_password_key(password, salt_hex)
-        return derived_key.hex() == stored_hash_hex
-    except Exception:
-        return False
-
 def decrypt_secret(encrypted_dict, key):
     aesgcm = AESGCM(key)
     nonce = bytes.fromhex(encrypted_dict["nonce"])
@@ -38,6 +31,8 @@ def decrypt_secret(encrypted_dict, key):
 
 def verify_totp(totp_secret: str, code: str) -> bool:
     totp = pyotp.TOTP(totp_secret)
+    expected = totp.now()
+    print(f"[DEBUG] Código esperado: {expected} — Código recebido: {code}")
     return totp.verify(code, valid_window=1)
 
 def verify_all(username: str, password: str, totp_code: str):
@@ -45,14 +40,14 @@ def verify_all(username: str, password: str, totp_code: str):
     if not user:
         return False, "Usuário não encontrado"
 
-    if not verify_password(user["password_hash"], password, user["salt"]):
-        return False, "Senha incorreta"
-
     try:
         key = derive_password_key(password, user["salt"])
+        if key.hex() != user["password_hash"]:
+            return False, "Senha incorreta"
         totp_secret = decrypt_secret(user["totp_encrypted"], key)
-    except Exception:
-        return False, "Falha ao decifrar TOTP secret"
+        print(f"[DEBUG] Secret decifrado: {totp_secret}")
+    except Exception as e:
+        return False, f"Falha ao decifrar TOTP secret: {e}"
 
     if not verify_totp(totp_secret, totp_code):
         return False, "Código TOTP inválido"
