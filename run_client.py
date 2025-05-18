@@ -31,8 +31,6 @@ def autenticar_e_enviar():
     try:
         # Derivação de chave e cifragem
         result = crypto.encrypt_message(totp_code, mensagem.decode())
-        ciphertext = bytes.fromhex(result["ciphertext"])
-        nonce = bytes.fromhex(result["nonce"])
         location = get_location()
 
         # Codificar binários para envio
@@ -40,8 +38,8 @@ def autenticar_e_enviar():
             "username": username,
             "password": password,
             "totp_code": totp_code,
-            "ciphertext": base64.b64encode(ciphertext).decode(),
-            "nonce": base64.b64encode(nonce).decode(),
+            "ciphertext": result["ciphertext"],
+            "iv_salt": result["iv_salt"],
             "location": location,
         }
 

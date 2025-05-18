@@ -15,7 +15,7 @@ def send_encrypted_message():
 
     payload = {
         "username": username,
-        "nonce": result["nonce"],
+        "iv_salt": result["iv_salt"],
         "ciphertext": result["ciphertext"]
     }
 

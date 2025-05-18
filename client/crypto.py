@@ -19,17 +19,35 @@ def derive_key_from_totp_code(totp_code: str) -> bytes:
 def encrypt_message(totp_code: str, plaintext: str):
     key = derive_key_from_totp_code(totp_code)
     aesgcm = AESGCM(key)
-    nonce = os.urandom(12)
-    ciphertext = aesgcm.encrypt(nonce, plaintext.encode(), None)
+    iv_salt = os.urandom(8)  # Salt para derivar o IV com PBKDF2
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=12,
+        salt=iv_salt,
+        iterations=100_000,
+        backend=default_backend()
+    )
+    iv = kdf.derive(totp_code.encode())
+
+    ciphertext = aesgcm.encrypt(iv, plaintext.encode(), None)
     return {
-        "nonce": nonce.hex(),
+        "iv_salt": iv_salt.hex(),
         "ciphertext": ciphertext.hex()
     }
 
-def decrypt_message(totp_code: str, nonce_hex: str, ciphertext_hex: str):
+def decrypt_message(totp_code: str, iv_salt_hex: str, ciphertext_hex: str):
     key = derive_key_from_totp_code(totp_code)
     aesgcm = AESGCM(key)
-    nonce = bytes.fromhex(nonce_hex)
+    iv_salt = bytes.fromhex(iv_salt_hex)
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=12,
+        salt=iv_salt,
+        iterations=100_000,
+        backend=default_backend()
+    )
+    iv = kdf.derive(totp_code.encode())
     ciphertext = bytes.fromhex(ciphertext_hex)
-    plaintext = aesgcm.decrypt(nonce, ciphertext, None)
+    plaintext = aesgcm.decrypt(iv, ciphertext, None)
+    
     return plaintext.decode()

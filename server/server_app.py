@@ -13,7 +13,7 @@ app = Flask(__name__)
 def receive_message():
     data = request.get_json()
 
-    required_fields = ["username", "password", "totp_code", "ciphertext", "nonce", "location"]
+    required_fields = required_fields = ["username", "password", "totp_code", "ciphertext", "iv_salt", "location"]
     if not all(field in data for field in required_fields):
         return jsonify({"error": "Missing fields"}), 400
 
@@ -24,8 +24,8 @@ def receive_message():
 
     # Decode base64 inputs
     try:
-        ciphertext = base64.b64decode(data["ciphertext"])
-        nonce = base64.b64decode(data["nonce"])
+        ciphertext = bytes.fromhex(data["ciphertext"])  # hex decoding
+        iv_salt = bytes.fromhex(data["iv_salt"])  
     except Exception as e:
         return jsonify({"error": f"Invalid base64 encoding: {e}"}), 400
 
@@ -38,7 +38,7 @@ def receive_message():
         return jsonify({"error": f"Authentication failed: {str(e)}"}), 403
     # Decifrar mensagem
     try:
-        mensagem = decrypt_message(totp_code, ciphertext, nonce)
+        mensagem = decrypt_message(totp_code, ciphertext, iv_salt)
         return jsonify({"message": mensagem.decode()}), 200
     except Exception as e:
         return jsonify({"error": f"Decryption failed: {str(e)}"}), 500

@@ -15,7 +15,16 @@ def derive_key_from_totp_code(totp_code: str) -> bytes:
     )
     return kdf.derive(totp_code.encode())
 
-def decrypt_message(totp_code: str, ciphertext: bytes, nonce: bytes) -> bytes:
+def decrypt_message(totp_code: str, ciphertext: bytes, iv_salt: bytes) -> bytes:
     key = derive_key_from_totp_code(totp_code)
     aesgcm = AESGCM(key)
-    return aesgcm.decrypt(nonce, ciphertext, None)
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=12,
+        salt=iv_salt,
+        iterations=100_000,
+        backend=default_backend()
+    )
+    iv = kdf.derive(totp_code.encode())
+
+    return aesgcm.decrypt(iv, ciphertext, None)
