@@ -34,20 +34,3 @@ def encrypt_message(totp_code: str, plaintext: str):
         "iv_salt": iv_salt.hex(),
         "ciphertext": ciphertext.hex()
     }
-
-def decrypt_message(totp_code: str, iv_salt_hex: str, ciphertext_hex: str):
-    key = derive_key_from_totp_code(totp_code)
-    aesgcm = AESGCM(key)
-    iv_salt = bytes.fromhex(iv_salt_hex)
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=12,
-        salt=iv_salt,
-        iterations=100_000,
-        backend=default_backend()
-    )
-    iv = kdf.derive(totp_code.encode())
-    ciphertext = bytes.fromhex(ciphertext_hex)
-    plaintext = aesgcm.decrypt(iv, ciphertext, None)
-    
-    return plaintext.decode()
