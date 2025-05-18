@@ -1,61 +1,44 @@
 # 🔐 Sistema de Autenticação 3FA com Criptografia Simétrica
 
-Implementação prática de autenticação de três fatores (3FA) com comunicação segura entre cliente e servidor,
-em conformidade com princípios de isolamento de contexto. Desenvolvido para a disciplina de Segurança em Redes (INE5680 - UFSC).
+Este projeto implementa uma autenticação segura baseada em **3 fatores (3FA)**, com envio de mensagens criptografadas de forma autenticada. Desenvolvido como atividade prática para a disciplina de Segurança em Redes (INE5680 - UFSC).
 
 ---
 
-## 📋 Descrição
+## ✅ Autenticação 3FA
 
-Este projeto demonstra um sistema de autenticação 3FA com criptografia simétrica (AES-GCM). Ele utiliza:
-
-- 🌍 Fator 1: Localização baseada em IP (consulta via IPInfo)
-- 🔑 Fator 2: Senha derivada com SCRYPT + salt aleatório
-- 🔄 Fator 3: TOTP (Time-based One-Time Password) com secret armazenado cifrado
-
----
-
-## 🧱 Arquitetura
-
-```
-[ CLIENTE ]                             [ SERVIDOR ]
-    |                                         |
-    | -- POST /register --------------------> |  ← Registro de usuário (dados, secret cifrado)
-    |                                         |
-    | -- POST /receive ---------------------> |  ← Autenticação 3FA e mensagem cifrada
-```
+| Fator                      | Descrição                                      |
+|----------------------------|-----------------------------------------------|
+| **1. Localização (IP)**    | Consulta país automaticamente via IPInfo      |
+| **2. Senha**               | Derivada com SCRYPT + salt aleatório          |
+| **3. TOTP**                | Código temporário gerado por app autenticador |
 
 ---
 
-## 🗃️ Estrutura do Projeto
+## 📦 Estrutura do Projeto
 
 ```
 secure-3fa-messaging/
-├── client/               # Código do lado cliente
-│   ├── register.py       # Coleta dados e envia cadastro via POST
-│   ├── auth.py           # Autenticação e TOTP
-│   ├── crypto.py         # Criptografia com AES-GCM
-│   ├── send_message.py   # Envia mensagem criptografada ao servidor
+├── client/
+│   ├── register.py        # Cadastro de usuário e envio ao servidor
+│   ├── auth.py            # (Opcional) Fluxo de autenticação
+│   ├── crypto.py          # Derivação de chave TOTP + cifragem AES-GCM
+│   ├── send_message.py    # Autentica e envia mensagem criptografada
 │
-├── server/               # Código do lado servidor
-│   ├── server_app.py     # Endpoints /register e /receive
-│   ├── verify_auth.py    # Verificação dos 3 fatores
-│   ├── crypto.py         # Decifragem da mensagem recebida
-│   └── user_db.json      # Base local de dados do servidor (somente servidor escreve)
+├── server/
+│   ├── server_app.py      # Servidor Flask com endpoints /register e /receive
+│   ├── crypto.py          # Derivação de chave e decifragem AES-GCM
+│   ├── verify_auth.py     # Valida senha, TOTP e decifra o secret
+│   └── user_db.json       # Armazena os usuários registrados
 │
-├── utils/                # Utilitários auxiliares
-│   ├── ipinfo_lookup.py  # Localização via IP
-│   └── qr_generator.py   # Geração de QR code para TOTP
-│
-├── run_client.py         # Interface do lado cliente
-├── run_server.py         # Inicializa o servidor Flask
-├── requirements.txt      # Dependências
-└── README.md             # Documentação (este arquivo)
+├── run_client.py          # Interface do lado cliente
+├── run_server.py          # Inicializa o servidor
+├── requirements.txt       # Dependências do projeto
+└── README.md              # Este arquivo
 ```
 
 ---
 
-## 🚀 Como Executar
+## 🚀 Como executar
 
 ### 1. Instale as dependências
 
@@ -63,56 +46,74 @@ secure-3fa-messaging/
 pip install -r requirements.txt
 ```
 
-### 2. Inicie o servidor
+### 2. Configure o IPInfo (para geolocalização)
 
-```bash
-python run_server.py
-```
-
-### 3. Execute o cliente
-
-```bash
-python run_client.py
-```
-
-O menu permite:
-- Registrar um novo usuário
-- Autenticar e enviar mensagem criptografada
-
----
-
-## 🔐 Segurança Implementada
-
-- Senhas derivadas com **SCRYPT + salt aleatório**
-- Secret TOTP **cifrado com AES-GCM** no lado cliente
-- Nenhum arquivo compartilhado entre cliente e servidor
-- TOTP validado com `pyotp`
-- Criptografia autenticada (AES-GCM) para mensagens
-- Chave simétrica derivada dinamicamente a partir do código TOTP (PBKDF2-like)
-
----
-
-## 🌐 IPInfo
-
-Para usar a localização via IP, crie um token gratuito em https://ipinfo.io/signup e defina a variável de ambiente:
+Cadastre-se em https://ipinfo.io/signup e defina o token:
 
 ```bash
 export IPINFO_TOKEN="seu_token"
 ```
 
+### 3. Inicie o servidor
+
+```bash
+python run_server.py
+```
+
+### 4. Execute o cliente
+
+```bash
+python run_client.py
+```
+
+Você verá um menu com opções para registrar e autenticar.
+
 ---
 
-## ✅ Conformidade com o Enunciado
+## 🔐 Fluxo detalhado
 
-- [x] Isolamento entre cliente e servidor
-- [x] Criptografia simétrica autenticada (AES-GCM)
-- [x] Chave derivada do TOTP
-- [x] Secret TOTP cifrado
-- [x] Senha derivada com SCRYPT
-- [x] Sem variáveis ou arquivos compartilhados
+1. **Registro (`register.py`):**
+   - Coleta nome, senha e telefone
+   - Gera `secret` TOTP e exibe para escanear no app (Google/Microsoft Authenticator)
+   - Deriva senha com SCRYPT
+   - Cifra o `secret` com AES-GCM
+   - Envia tudo via HTTP POST ao servidor
+
+2. **Autenticação + Envio (`send_message.py`):**
+   - Solicita usuário, senha, código TOTP e a mensagem
+   - Valida a senha e decifra o `secret` do usuário
+   - Deriva a chave com o código TOTP
+   - Cifra a mensagem com AES-GCM
+   - Envia ao servidor
+
+3. **Servidor (`server_app.py`):**
+   - Valida os 3 fatores
+   - Deriva a mesma chave a partir do TOTP
+   - Decifra a mensagem e retorna ao cliente
 
 ---
 
-## 🧑‍💻 Autor
+## 🔎 Segurança aplicada
 
-Este projeto foi desenvolvido como parte da disciplina INE5680 — Segurança em Redes — UFSC.
+- Criptografia simétrica autenticada (**AES-GCM**)
+- Chave derivada com **PBKDF2 + código TOTP**
+- Senha protegida com **SCRYPT** e salt único
+- Secret TOTP **nunca salvo em claro**
+- Tolerância de tempo com `valid_window=1` para pequenos desvios de relógio
+
+---
+
+## 🛠️ Requisitos atendidos
+
+- [x] Autenticação com 3 fatores
+- [x] Criptografia autenticada
+- [x] Derivação de chave segura
+- [x] Sem arquivos compartilhados entre cliente e servidor
+- [x] Secret TOTP cifrado no cadastro
+- [x] Servidor validando tudo localmente
+
+---
+
+## 👨‍💻 Autor
+
+Desenvolvido por [Seu Nome] como projeto da disciplina INE5680 - Segurança em Redes.
