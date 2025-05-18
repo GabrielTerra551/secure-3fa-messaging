@@ -27,8 +27,10 @@ def autenticar_e_enviar():
 
     try:
         # Derivação de chave e cifragem
-        key = crypto.derive_key_from_totp(totp_code)
-        ciphertext, nonce = crypto.encrypt_message(key, mensagem)
+        result = crypto.encrypt_message(totp_code, mensagem.decode())
+        ciphertext = bytes.fromhex(result["ciphertext"])
+        nonce = bytes.fromhex(result["nonce"])
+
 
         # Codificar binários para envio
         data = {
