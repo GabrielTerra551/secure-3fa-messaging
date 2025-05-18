@@ -38,7 +38,7 @@ def decrypt_secret(encrypted_dict, key):
 
 def verify_totp(totp_secret: str, code: str) -> bool:
     totp = pyotp.TOTP(totp_secret)
-    return totp.verify(code)
+    return totp.verify(code, valid_window=1)
 
 def verify_all(username: str, password: str, totp_code: str):
     user = load_user(username)

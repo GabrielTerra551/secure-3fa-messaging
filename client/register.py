@@ -37,18 +37,6 @@ def encrypt_secret(secret: str, key: bytes) -> dict:
         "ciphertext": ct.hex()
     }
 
-# def save_user_to_db(user_record):
-#     if os.path.exists(USER_DB_PATH):
-#         with open(USER_DB_PATH, 'r') as f:
-#             db = json.load(f)
-#     else:
-#         db = {}
-
-#     db[user_record["username"]] = user_record
-
-#     with open(USER_DB_PATH, 'w') as f:
-#         json.dump(db, f, indent=4)
-
 def enviar_para_servidor(user_record):
     response = requests.post("http://localhost:5000/register", json=user_record)
     if response.status_code == 200:
