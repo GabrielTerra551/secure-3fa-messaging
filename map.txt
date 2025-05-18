@@ -1,5 +1,6 @@
 secure-3fa-messaging/
 ├── client/
+|   |─ __init__.py
 │   ├── register.py
 │   │   └── Realiza o cadastro do usuário:
 │   │       - Gera salt e derivada da senha com SCRYPT
@@ -26,6 +27,7 @@ secure-3fa-messaging/
 │       └── Armazena localmente os secrets TOTP gerados (simulando app autenticador)
 │
 ├── server/
+|   |─ __init__.py
 │   ├── server_app.py
 │   │   └── Servidor Flask:
 │   │       - Recebe as mensagens cifradas via `/receive`
@@ -48,6 +50,7 @@ secure-3fa-messaging/
 │           - Armazena nome, telefone, localização, senha derivada, salt e secret TOTP cifrado
 │
 ├── utils/
+|   |─ __init__.py
 │   ├── ipinfo_lookup.py
 │   │   └── Consulta IPInfo para obter cidade e país do IP público do usuário
 │   │
