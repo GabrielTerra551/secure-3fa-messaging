@@ -31,12 +31,13 @@ def receive_message():
     # Autenticação 3FA
     try:
         secret = verify_all(username, password, totp_code)
+        if not secret[0]:
+            return jsonify({"error":"Authentication failed: " + secret[1]}), 403
     except Exception as e:
         return jsonify({"error": f"Authentication failed: {str(e)}"}), 403
-
     # Decifrar mensagem
     try:
-        mensagem = decrypt_message(secret, totp_code, ciphertext, nonce)
+        mensagem = decrypt_message(totp_code, ciphertext, nonce)
         return jsonify({"message": mensagem.decode()}), 200
     except Exception as e:
         return jsonify({"error": f"Decryption failed: {str(e)}"}), 500

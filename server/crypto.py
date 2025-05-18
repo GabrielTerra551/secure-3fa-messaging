@@ -6,7 +6,6 @@ from cryptography.hazmat.backends import default_backend
 FIXED_SALT = b"3fa_crypto_salt"
 
 def derive_key_from_totp_code(totp_code: str) -> bytes:
-    """Deriva a chave da sessão a partir do código TOTP informado (verificado anteriormente)."""
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
@@ -16,13 +15,7 @@ def derive_key_from_totp_code(totp_code: str) -> bytes:
     )
     return kdf.derive(totp_code.encode())
 
-def decrypt_message(totp_secret: str, totp_code: str, ciphertext: bytes, nonce: bytes) -> bytes:
-    """
-    Decifra a mensagem usando AES-GCM com chave derivada do código TOTP.
-    Presume que o código TOTP foi previamente validado.
-    """
+def decrypt_message(totp_code: str, ciphertext: bytes, nonce: bytes) -> bytes:
     key = derive_key_from_totp_code(totp_code)
     aesgcm = AESGCM(key)
     return aesgcm.decrypt(nonce, ciphertext, None)
-
-# Nenhuma função de linha de comando é necessária aqui — uso interno do servidor
