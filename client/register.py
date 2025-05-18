@@ -16,14 +16,7 @@ def get_location(ip: str = None):
     return details.country_name or "Unknown"
 
 def hash_password(password: str, salt: bytes) -> bytes:
-    kdf = Scrypt(
-        salt=salt,
-        length=32,
-        n=2**14,
-        r=8,
-        p=1,
-        backend=default_backend()
-    )
+    kdf = Scrypt(salt=salt, length=32, n=2**14, r=8, p=1, backend=default_backend())
     return kdf.derive(password.encode())
 
 def encrypt_secret(secret: str, key: bytes) -> dict:

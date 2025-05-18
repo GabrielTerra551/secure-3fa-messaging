@@ -102,5 +102,5 @@ python run_client.py
 
 ## 👨‍💻 Autor
 
-Trabalho desenvolvido por [Seu Nome] para a disciplina INE5680 - Segurança em Redes  
+Trabalho desenvolvido por Gabriel Terra & Pedro Rushel para a disciplina INE5680 - Segurança em Redes  
 Universidade Federal de Santa Catarina – UFSC
