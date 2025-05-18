@@ -41,6 +41,7 @@ def verify_all(username: str, password: str, totp_code: str, location: str):
         return False, "Usuário não encontrado"
 
     if user["location"] != location:
+        print(f"{user['location']} != {location}")
         return False, "Localização não corresponde ao registro"
 
     try:
