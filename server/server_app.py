@@ -1,5 +1,7 @@
 from flask import Flask, request, jsonify
 import base64
+import os
+import json
 
 from server.verify_auth import verify_all
 
@@ -38,6 +40,31 @@ def receive_message():
         return jsonify({"message": mensagem.decode()}), 200
     except Exception as e:
         return jsonify({"error": f"Decryption failed: {str(e)}"}), 500
+
+USER_DB_PATH = os.path.join(os.path.dirname(__file__), "user_db.json")
+
+@app.route("/register", methods=["POST"])
+def register_user():
+    data = request.get_json()
+
+    required_fields = ["username", "phone", "location", "password_hash", "salt", "totp_encrypted"]
+    if not all(field in data for field in required_fields):
+        return jsonify({"error": "Missing registration fields"}), 400
+
+    # Carregar ou criar banco de dados
+    if os.path.exists(USER_DB_PATH):
+        with open(USER_DB_PATH, "r") as f:
+            db = json.load(f)
+    else:
+        db = {}
+
+    username = data["username"]
+    db[username] = data
+
+    with open(USER_DB_PATH, "w") as f:
+        json.dump(db, f, indent=4)
+
+    return jsonify({"message": "Usuário registrado com sucesso"}), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

@@ -2,6 +2,8 @@ import os
 import json
 import pyotp
 import ipinfo
+import requests
+
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.backends import default_backend
@@ -35,17 +37,24 @@ def encrypt_secret(secret: str, key: bytes) -> dict:
         "ciphertext": ct.hex()
     }
 
-def save_user_to_db(user_record):
-    if os.path.exists(USER_DB_PATH):
-        with open(USER_DB_PATH, 'r') as f:
-            db = json.load(f)
+# def save_user_to_db(user_record):
+#     if os.path.exists(USER_DB_PATH):
+#         with open(USER_DB_PATH, 'r') as f:
+#             db = json.load(f)
+#     else:
+#         db = {}
+
+#     db[user_record["username"]] = user_record
+
+#     with open(USER_DB_PATH, 'w') as f:
+#         json.dump(db, f, indent=4)
+
+def enviar_para_servidor(user_record):
+    response = requests.post("http://localhost:5000/register", json=user_record)
+    if response.status_code == 200:
+        print("✅ Registro enviado com sucesso ao servidor.")
     else:
-        db = {}
-
-    db[user_record["username"]] = user_record
-
-    with open(USER_DB_PATH, 'w') as f:
-        json.dump(db, f, indent=4)
+        print(f"❌ Erro ao registrar no servidor: {response.text}")
 
 def registrar():
     username = input("Nome do usuário: ")
@@ -71,7 +80,8 @@ def registrar():
         "totp_encrypted": secret_encrypted
     }
 
-    save_user_to_db(user_record)
+    enviar_para_servidor(user_record)
+
     print("Usuário registrado com sucesso.")
     print(f"Secret TOTP (adicione no seu autenticador): {totp_secret}")
 
