@@ -2,9 +2,9 @@ import json
 import base64
 import requests
 
-from utils.ipinfo_lookup import get_location
 from getpass import getpass
-from client import register, auth, crypto
+from client import register, crypto
+
 
 SERVER_URL = "http://localhost:5000/receive"  # Altere conforme necessário
 
@@ -18,6 +18,8 @@ def registrar_usuario():
     register.registrar()
 
 def autenticar_e_enviar():
+    from client.register import get_location
+
     print("\n--- Autenticação 3FA ---")
     username = input("Nome de usuário: ")
     password = getpass("Senha: ")

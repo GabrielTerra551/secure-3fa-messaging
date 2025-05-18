@@ -1,5 +1,4 @@
 import os
-import json
 import pyotp
 import ipinfo
 import requests
@@ -71,6 +70,3 @@ def registrar():
 
     print("Usuário registrado com sucesso.")
     print(f"Secret TOTP (adicione no seu autenticador): {totp_secret}")
-
-if __name__ == "__main__":
-    registrar()
