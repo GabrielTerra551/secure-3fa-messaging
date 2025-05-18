@@ -47,7 +47,7 @@ def save_user_to_db(user_record):
     with open(USER_DB_PATH, 'w') as f:
         json.dump(db, f, indent=4)
 
-def register_user():
+def registrar():
     username = input("Nome do usuário: ")
     password = input("Senha: ")
     phone = input("Número de telefone (opcional): ")
@@ -76,4 +76,4 @@ def register_user():
     print(f"Secret TOTP (adicione no seu autenticador): {totp_secret}")
 
 if __name__ == "__main__":
-    register_user()
+    registrar()
